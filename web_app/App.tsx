@@ -1,51 +1,61 @@
-import React, { useState } from 'react';
-import { Users, Bot, Home, User, MessageSquare, Settings, Upload, TrendingUp } from 'lucide-react';
-import { Button } from './components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar';
-import { Badge } from './components/ui/badge';
-import { Sidebar } from './components/ui/sidebar';
-import { Header } from './components/Header';
-import { Dashboard } from './components/Dashboard';
-import { Profile } from './components/Profile';
-import { AgentConfig } from './components/AgentConfig';
-import { Feed } from './components/Feed';
-import { AgentNetwork } from './components/AgentNetwork';
-import { Connections } from './components/Connections';
+import React, { useState } from "react";
+import {
+  Users,
+  Bot,
+  Home,
+  User,
+  MessageSquare,
+  Settings,
+  Upload,
+  TrendingUp,
+} from "lucide-react";
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
+import { Badge } from "./components/ui/badge";
+import { Sidebar } from "./components/ui/sidebar";
+import { Header } from "./components/Header";
+import { Dashboard } from "./components/Dashboard";
+import { Profile } from "./components/Profile";
+import { AgentConfig } from "./components/AgentConfig";
+import { Feed } from "./components/Feed";
+import { AgentNetwork } from "./components/AgentNetwork";
+import { Connections } from "./components/Connections";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [user] = useState({
-    name: 'Alex Johnson',
-    title: 'Senior Software Engineer',
-    company: 'TechCorp',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+    name: "Alex Johnson",
+    title: "Senior Software Engineer",
+    company: "TechCorp",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
     connections: 247,
-    agentActive: true
+    agentActive: true,
   });
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'feed', label: 'Feed', icon: TrendingUp },
-    { id: 'agent-network', label: 'Agent Network', icon: Bot },
-    { id: 'connections', label: 'Connections', icon: Users },
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'agent-config', label: 'Agent Config', icon: Settings },
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "feed", label: "Feed", icon: TrendingUp },
+    { id: "agent-network", label: "Agent Network", icon: Bot },
+    { id: "connections", label: "Connections", icon: Users },
+    { id: "profile", label: "Profile", icon: User },
+    { id: "agent-config", label: "Agent Config", icon: Settings },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard user={user} />;
-      case 'profile':
+      case "profile":
         return <Profile user={user} />;
-      case 'agent-config':
+      case "agent-config":
         return <AgentConfig user={user} />;
-      case 'feed':
+      case "feed":
         return <Feed user={user} />;
-      case 'agent-network':
+      case "agent-network":
         return <AgentNetwork user={user} />;
-      case 'connections':
+      case "connections":
         return <Connections user={user} />;
       default:
         return <Dashboard user={user} />;
@@ -64,19 +74,40 @@ export default function App() {
             <h1 className="font-semibold text-lg">TwinNet</h1>
           </div>
         </div>
-        
+
         <nav className="px-4 pb-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            const buttonClasses = `w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+              isActive
+                ? "font-medium shadow-sm"
+                : "hover:shadow-sm"
+            }`;
+
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === item.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent text-foreground'
-                }`}
+                className={buttonClasses}
+                data-active={isActive}
+                style={{
+                  backgroundColor: isActive ? "#000000" : "transparent",
+                  color: isActive ? "#ffffff" : "#374151",
+                  fontWeight: isActive ? "500" : "400"
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = "#6b7280";
+                    e.currentTarget.style.color = "#ffffff";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "#374151";
+                  }
+                }}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -92,14 +123,23 @@ export default function App() {
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  <AvatarFallback>
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="truncate">{user.name}</p>
                   <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${user.agentActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        user.agentActive ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    />
                     <span className="text-xs text-muted-foreground">
-                      Agent {user.agentActive ? 'Active' : 'Inactive'}
+                      Agent {user.agentActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>
@@ -112,9 +152,7 @@ export default function App() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <Header user={user} />
-        <main className="p-6">
-          {renderContent()}
-        </main>
+        <main className="p-6">{renderContent()}</main>
       </div>
     </div>
   );
