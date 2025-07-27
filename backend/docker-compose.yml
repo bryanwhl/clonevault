@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # FastAPI Application
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/digital_twin_db
+      - REDIS_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+    env_file:
+      - .env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    networks:
+      - digital-twin-network
+
+  # Celery Worker
+  celery-worker:
+    build: .
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/digital_twin_db
+      - REDIS_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: celery -A app.core.celery_app:celery_app worker --loglevel=info --concurrency=4
+    restart: unless-stopped
+    networks:
+      - digital-twin-network
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build: .
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/digital_twin_db
+      - REDIS_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: celery -A app.core.celery_app:celery_app beat --loglevel=info
+    restart: unless-stopped
+    networks:
+      - digital-twin-network
+
+  # Celery Flower (Monitoring)
+  flower:
+    build: .
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    command: celery -A app.core.celery_app:celery_app flower --port=5555
+    restart: unless-stopped
+    networks:
+      - digital-twin-network
+
+  # PostgreSQL Database
+  db:
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_DB: digital_twin_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database_schema.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - digital-twin-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    networks:
+      - digital-twin-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  digital-twin-network:
+    driver: bridge

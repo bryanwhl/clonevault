@@ -39,7 +39,18 @@ Say: "I'll spawn agents to tackle different aspects of this problem" whenever a 
 - Before declaring "done"
 - **WHEN HOOKS FAIL WITH ERRORS** ❌
 
-Run: `make fmt && make test && make lint`
+**For Web App:**
+```bash
+cd web_app/
+npm run lint && npm run build
+```
+
+**For Python Agents:**
+```bash
+cd agents/
+python -m pytest test_agent.py
+python digital_twin_agent.py  # Manual smoke test
+```
 
 > Why: You can lose track of what's actually working. These checkpoints prevent cascading failures.
 
@@ -83,29 +94,51 @@ Your code must be 100% clean. No exceptions.
 - [ ] What comes next
 ```
 
-## Go-Specific Rules
+## Project-Specific Rules
 
-### FORBIDDEN - NEVER DO THESE:
-- **NO interface{}** or **any{}** - use concrete types!
-- **NO time.Sleep()** or busy waits - use channels for synchronization!
+### TwinNet Digital Twin Platform
+This project consists of two main components:
+1. **Python AI Agents** (`/agents/`) - LangGraph-based digital twin agents
+2. **React Web App** (`/web_app/`) - TypeScript frontend for agent management
+
+### Python Agent Rules
+
+#### FORBIDDEN - NEVER DO THESE:
+- **NO hardcoded API keys** - always use environment variables
+- **NO time.sleep()** for polling - use proper async patterns
 - **NO** keeping old and new code together
 - **NO** migration functions or compatibility layers
 - **NO** versioned function names (processV2, handleNew)
-- **NO** custom error struct hierarchies
+- **NO** unhandled exceptions in main flow
 - **NO** TODOs in final code
 
-> **AUTOMATED ENFORCEMENT**: The smart-lint hook will BLOCK commits that violate these rules.  
-> When you see `❌ FORBIDDEN PATTERN`, you MUST fix it immediately!
-
-### Required Standards:
+#### Required Standards:
 - **Delete** old code when replacing it
-- **Meaningful names**: `userID` not `id`
-- **Early returns** to reduce nesting
-- **Concrete types** from constructors: `func NewServer() *Server`
-- **Simple errors**: `return fmt.Errorf("context: %w", err)`
-- **Table-driven tests** for complex logic
-- **Channels for synchronization**: Use channels to signal readiness, not sleep
-- **Select for timeouts**: Use `select` with timeout channels, not sleep loops
+- **Meaningful names**: `user_id` not `id`
+- **Type hints** on all functions
+- **Proper error handling** with try/except blocks
+- **Environment variables** for all configuration
+- **Async/await** for I/O operations when possible
+- **Virtual environment** activation before running
+
+### React/TypeScript Web App Rules
+
+#### FORBIDDEN - NEVER DO THESE:
+- **NO `any` types** - use proper TypeScript types
+- **NO inline styles** - use Tailwind CSS classes
+- **NO** keeping old and new code together
+- **NO** unused imports or variables
+- **NO** console.log in production code
+- **NO** TODOs in final code
+
+#### Required Standards:
+- **Delete** old code when replacing it
+- **Meaningful names**: `userId` not `id`
+- **Proper TypeScript types** for all props and state
+- **Functional components** with hooks
+- **shadcn/ui components** for consistent UI
+- **Accessibility** attributes (ARIA labels, roles)
+- **Responsive design** with Tailwind breakpoints
 
 ## Implementation Standards
 
@@ -124,9 +157,23 @@ Your code must be 100% clean. No exceptions.
 
 ### Project Structure
 ```
-cmd/        # Application entrypoints
-internal/   # Private code (the majority goes here)
-pkg/        # Public libraries (only if truly reusable)
+/
+├── agents/                    # Python AI agent backend
+│   ├── digital_twin_agent.py  # Main agent implementation
+│   ├── mcp_server.py          # MCP server for resume parsing
+│   ├── requirements.txt       # Python dependencies
+│   └── test_agent.py          # Agent tests
+├── web_app/                   # React TypeScript frontend
+│   ├── src/main.tsx           # React app entry point
+│   ├── components/            # React components
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── AgentConfig.tsx   # Agent configuration
+│   │   ├── Dashboard.tsx     # Main dashboard
+│   │   └── ...
+│   ├── package.json          # Node.js dependencies
+│   └── vite.config.ts        # Build configuration
+├── files/                    # Resume PDFs and assets
+└── CLAUDE.md                 # This development guide
 ```
 
 ## Problem-Solving Together
@@ -173,3 +220,46 @@ Would you like me to [specific improvement]?"
 - **REMINDER**: If this file hasn't been referenced in 30+ minutes, RE-READ IT!
 
 Avoid complex abstractions or "clever" code. The simple, obvious solution is probably better, and my guidance helps you stay focused on what matters.
+
+## Automated Documentation Update System
+
+### Documentation Files Overview
+
+#### Primary Documentation
+- **`CLAUDE.md`** - Development guidelines and project conventions (this file)
+- **`agents/README.md`** - Python AI agent setup and usage instructions
+- **`web_app/README.md`** - React frontend setup and development guide
+- **`web_app/Attributions.md`** - Licensing and attribution information
+
+#### Missing Documentation (Recommended)
+- **`CONTRIBUTING.md`** - Contribution guidelines and workflow
+- **`TROUBLESHOOTING.md`** - Common issues and solutions
+- **`PATTERNS.md`** - Code patterns and architectural decisions
+- **`DEPLOYMENT.md`** - Production deployment instructions
+
+### Documentation Update Rules
+
+#### When to Update Documentation
+- **Before major feature implementation** - Update patterns and conventions
+- **After architectural changes** - Reflect new project structure
+- **When adding new dependencies** - Update setup instructions
+- **After discovering patterns** - Document for future reference
+- **Before final commit** - Ensure all changes are documented
+
+#### Documentation Approval Process
+1. **Propose Changes** - Describe what documentation needs updating and why
+2. **Get Approval** - Ask: "Should I update [documentation] to include [change]?"
+3. **Make Updates** - Only update after explicit approval
+4. **Verify Accuracy** - Ensure instructions are complete and correct
+
+#### Constraints and Security
+- **NO sensitive information** - Never include API keys, passwords, or secrets
+- **NO auto-updates** - Always get approval before changing documentation
+- **Version control** - All documentation changes must be committed
+- **Accuracy first** - Test all instructions before documenting them
+
+#### Documentation Standards
+- **Clear instructions** - Step-by-step with expected outcomes
+- **Up-to-date dependencies** - Verify all versions and commands work
+- **Cross-platform notes** - Include OS-specific instructions when needed
+- **Error handling** - Document common issues and solutions

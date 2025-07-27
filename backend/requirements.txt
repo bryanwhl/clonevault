@@ -1,0 +1,64 @@
+# FastAPI and web framework dependencies
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+websockets==12.0
+
+# Database dependencies
+supabase==2.3.4
+asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.28
+alembic==1.13.1
+
+# Authentication dependencies
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+google-auth==2.27.0
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+
+# Redis and Celery for background tasks
+redis==5.0.1
+celery[redis]==5.3.6
+flower==2.0.1
+
+# Vector database and AI dependencies
+pinecone-client==3.0.3
+openai==1.12.0
+tiktoken==0.6.0
+pgvector==0.2.4
+
+# File handling and parsing
+python-multipart==0.0.9
+PyPDF2==3.0.1
+python-magic==0.4.27
+
+# Validation and utilities
+pydantic==2.6.1
+pydantic-settings==2.1.0
+email-validator==2.1.1
+python-dotenv==1.0.1
+
+# HTTP client
+httpx==0.26.0
+
+# Testing dependencies
+pytest==8.0.2
+pytest-asyncio==0.23.5
+pytest-mock==3.12.0
+httpx==0.26.0
+
+# Development dependencies
+black==24.2.0
+flake8==7.0.0
+mypy==1.8.0
+types-redis==4.6.0.20240218
+
+# Monitoring and logging
+structlog==24.1.0
+sentry-sdk[fastapi]==1.40.6
+
+# CORS
+fastapi-cors==0.0.6
+
+# Rate limiting
+slowapi==0.1.9
