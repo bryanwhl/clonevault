@@ -4,11 +4,13 @@ An autonomous AI agent that serves as a digital twin, capable of engaging in con
 
 ## Features
 
-- **Resume Parsing**: Automatically extracts and structures information from PDF resumes
-- **Digital Twin Personality**: Emulates the individual's professional knowledge and experience
-- **Networking-Oriented**: Exhibits curiosity and asks insightful questions about conversation partners
-- **Context-Aware**: Maintains conversation flow and adapts responses based on topics
-- **Interactive CLI**: Command-line interface for real-time conversations
+- 🤖 **LangGraph-based Conversation Flow** - Strategic conversation planning and response generation
+- 🔍 **Dynamic LinkedIn Scraping** - Real-time profile data extraction for any user
+- 💾 **SQLite Database Integration** - Comprehensive user profile storage and management
+- 📝 **Dynamic Prompt Generation** - Conversation-specific prompt prefixes with user context
+- 🌐 **Multi-user Support** - Parameterized startup for different users
+- 📋 **Resume Processing** - PDF resume parsing with detailed attribute extraction
+- 🔄 **Real-time Data Processing** - Automatic profile updates during agent initialization
 
 ## Architecture
 
@@ -26,19 +28,82 @@ An autonomous AI agent that serves as a digital twin, capable of engaging in con
 python setup.py
 ```
 
-### 2. Configure API Key
+### 2. Configure Environment
 
-Edit the `.env` file and add your OpenAI API key:
+Copy the example environment file and configure your credentials:
 
 ```bash
+cp .env.example .env
+```
+
+Edit the `.env` file and add your credentials:
+
+```bash
+# Required: OpenAI API Key
 OPENAI_API_KEY=your_actual_api_key_here
+
+# Optional: LinkedIn Scraping (for enhanced profile data)
+LINKEDIN_EMAIL=your-email@domain.com
+LINKEDIN_PASSWORD=your-password
 ```
 
 ### 3. Run the Agent
 
+#### Web Interface (Recommended)
+```bash
+# Default user
+python start_web_chat.py
+
+# Specific user
+python start_web_chat.py --user bryan_wong_001
+```
+
+#### Command Line Interface
 ```bash
 python digital_twin_agent.py
 ```
+
+## LinkedIn Scraping
+
+The system includes advanced LinkedIn profile scraping capabilities for dynamic user data extraction.
+
+### Data Extracted
+- **Basic Profile**: Headline, summary, location, industry
+- **Work Experience**: Job titles, companies, dates, descriptions, locations
+- **Education**: Degrees, institutions, graduation dates, GPA, honors
+- **Keywords**: Technical skills and industry-specific terms
+
+### Authentication Levels
+
+#### No Authentication (Default)
+- Extracts basic profile information
+- Intelligent fallbacks based on URL patterns
+- Industry detection from profile identifiers
+
+#### With Authentication (Enhanced)
+- Complete work experience history
+- Detailed education records
+- Comprehensive skill extraction
+- Full profile summaries
+
+### Setup LinkedIn Credentials
+
+1. **Add to .env file**:
+   ```bash
+   LINKEDIN_EMAIL=your-email@domain.com
+   LINKEDIN_PASSWORD=your-password
+   ```
+
+2. **Security Considerations**:
+   - Credentials are stored locally in `.env` (never committed to git)
+   - Uses secure authentication through selenium
+   - Respects LinkedIn's rate limiting and privacy settings
+
+3. **How It Works**:
+   - Real-time scraping during agent initialization
+   - Automatic ChromeDriver management
+   - Intelligent retry mechanisms with fallbacks
+   - Works for any LinkedIn profile URL
 
 ## Detailed Setup & Usage Instructions
 

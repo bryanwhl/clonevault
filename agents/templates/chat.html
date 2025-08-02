@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Digital Twin Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 95%;
+            max-width: 900px;
+            height: 95vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 1.4em;
+            margin-bottom: 2px;
+        }
+
+        .status {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .feature-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .profile-info {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .stat {
+            background: white;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+        }
+
+        .user-context {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85em;
+        }
+
+        .context-section {
+            margin-bottom: 15px;
+        }
+
+        .context-section h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .context-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+
+        .context-item {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            border: 1px solid #e0e0e0;
+            color: #555;
+        }
+
+        .context-text {
+            color: #666;
+            line-height: 1.4;
+            margin: 5px 0;
+        }
+
+        .toggle-context {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 0.8em;
+            cursor: pointer;
+            padding: 5px 0;
+            text-decoration: underline;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.agent {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .agent .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .agent-question {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-style: italic;
+            max-width: 75%;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .controls {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .controls button {
+            margin: 0;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .user-selector {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #f44336;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .feature-badge {
+                font-size: 0.6em;
+                padding: 2px 6px;
+            }
+            
+            .profile-stats {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <h1>Enhanced Digital Twin Agent</h1>
+                <div class="status" id="status">Connecting...</div>
+            </div>
+            <div class="header-right">
+                <div class="feature-badge">💾 Database</div>
+                <div class="feature-badge">📝 Smart Prompts</div>
+            </div>
+        </div>
+
+        <div class="profile-info" id="profileInfo" style="display: none;">
+            <div id="profileDetails"></div>
+            <div class="profile-stats" id="profileStats"></div>
+        </div>
+
+        <div class="user-context" id="userContext" style="display: none;">
+            <button class="toggle-context" id="toggleContext">Show User Context</button>
+            <div id="contextDetails" style="display: none;"></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message agent">
+                <div class="message-bubble">
+                    Hi there! I'm your enhanced digital twin agent. Nice to meet you!
+                </div>
+                <div class="agent-question">
+                    What brings you here today? I'd love to learn more about you!
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div>🤔 Thinking...</div>
+        </div>
+
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="Type your message here..." disabled>
+                <button id="sendButton" disabled>Send</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-left">
+                <button id="resetButton">Reset Chat</button>
+                <button id="profileButton">View Profile</button>
+            </div>
+            <div class="controls-right">
+                <select id="userSelector" class="user-selector">
+                    <option value="">Loading users...</option>
+                </select>
+                <button id="switchUserButton">Switch User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Agent Profile</h2>
+            <div id="modalProfileDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const resetButton = document.getElementById('resetButton');
+        const profileButton = document.getElementById('profileButton');
+        const switchUserButton = document.getElementById('switchUserButton');
+        const userSelector = document.getElementById('userSelector');
+        const status = document.getElementById('status');
+        const loading = document.getElementById('loading');
+        const profileInfo = document.getElementById('profileInfo');
+        const profileDetails = document.getElementById('profileDetails');
+        const profileStats = document.getElementById('profileStats');
+        const profileModal = document.getElementById('profileModal');
+        const modalProfileDetails = document.getElementById('modalProfileDetails');
+        const userContext = document.getElementById('userContext');
+        const toggleContext = document.getElementById('toggleContext');
+        const contextDetails = document.getElementById('contextDetails');
+
+        let currentAgent = null;
+
+        // Check agent status on load
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.status === 'ready') {
+                    currentAgent = data;
+                    status.textContent = `Ready - ${data.user_summary}`;
+                    updateProfileInfo(data);
+                    loadUserContext();
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    loadUsers();
+                } else {
+                    status.textContent = 'Agent not ready';
+                    showError('Agent is not initialized. Please check the server logs.');
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+                status.textContent = 'Connection failed';
+                showError('Failed to connect to the agent. Please make sure the server is running.');
+            }
+        }
+
+        // Update profile information display
+        function updateProfileInfo(agentData) {
+            if (agentData.agent_name) {
+                profileDetails.innerHTML = `
+                    <strong>${agentData.agent_name}</strong> - ${agentData.agent_role} at ${agentData.agent_company}
+                `;
+                profileInfo.style.display = 'block';
+                
+                // Load detailed profile stats
+                loadProfileStats();
+            }
+        }
+
+        // Load profile statistics
+        async function loadProfileStats() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                profileStats.innerHTML = `
+                    <div class="stat">📚 ${data.education_count} Education</div>
+                    <div class="stat">💼 ${data.experience_count} Roles</div>
+                    <div class="stat">🛠️ ${data.skills_count} Skills</div>
+                    <div class="stat">🚀 ${data.projects_count} Projects</div>
+                    <div class="stat">❤️ ${data.interests_count} Interests</div>
+                    <div class="stat">🤝 ${data.networking_goals_count} Goals</div>
+                `;
+            } catch (error) {
+                console.error('Failed to load profile stats:', error);
+            }
+        }
+
+        // Load comprehensive user context
+        async function loadUserContext() {
+            try {
+                const response = await fetch('/api/user_context');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    userContext.style.display = 'block';
+                    displayUserContext(data);
+                } else {
+                    console.error('Failed to load user context:', data.error);
+                }
+            } catch (error) {
+                console.error('Failed to load user context:', error);
+            }
+        }
+
+        // Display comprehensive user context
+        function displayUserContext(context) {
+            let contextHTML = '';
+            
+            // Education
+            if (context.education && context.education.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>🎓 Education</h4>
+                        ${context.education.map(edu => `
+                            <div class="context-text">
+                                <strong>${edu.degree}</strong> ${edu.field ? `in ${edu.field}` : ''}<br>
+                                ${edu.institution} ${edu.graduation_year ? `(${edu.graduation_year})` : ''}
+                                ${edu.gpa ? `- GPA: ${edu.gpa}` : ''}
+                                ${edu.honors ? `- ${edu.honors}` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Work Experience
+            if (context.work_experience && context.work_experience.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>💼 Work Experience</h4>
+                        ${context.work_experience.slice(0, 3).map(exp => `
+                            <div class="context-text">
+                                <strong>${exp.title}</strong> at ${exp.company}<br>
+                                ${exp.start_date} - ${exp.end_date || 'Present'}
+                                ${exp.description ? `<br><em>${exp.description.substring(0, 100)}${exp.description.length > 100 ? '...' : ''}</em>` : ''}
+                            </div>
+                        `).join('')}
+                        ${context.work_experience.length > 3 ? `<div class="context-text"><em>...and ${context.work_experience.length - 3} more roles</em></div>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Skills
+            if (context.skills && context.skills.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>🛠️ Skills</h4>
+                        <div class="context-list">
+                            ${context.skills.slice(0, 20).map(skill => `
+                                <span class="context-item">${skill.name}</span>
+                            `).join('')}
+                            ${context.skills.length > 20 ? `<span class="context-item">+${context.skills.length - 20} more</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Projects
+            if (context.projects && context.projects.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>🚀 Notable Projects</h4>
+                        ${context.projects.slice(0, 3).map(project => `
+                            <div class="context-text">
+                                <strong>${project.name}</strong>
+                                ${project.description ? `<br><em>${project.description.substring(0, 80)}${project.description.length > 80 ? '...' : ''}</em>` : ''}
+                                ${project.technologies ? `<br>Tech: ${project.technologies.split(',').slice(0, 3).join(', ')}` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Professional Interests
+            if (context.professional_interests && context.professional_interests.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>❤️ Professional Interests</h4>
+                        <div class="context-list">
+                            ${context.professional_interests.map(interest => `
+                                <span class="context-item">${interest.interest}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Networking Goals
+            if (context.networking_goals && context.networking_goals.length > 0) {
+                contextHTML += `
+                    <div class="context-section">
+                        <h4>🤝 Networking Goals</h4>
+                        <div class="context-list">
+                            ${context.networking_goals.map(goal => `
+                                <span class="context-item">${goal.goal}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // LinkedIn Attributes
+            if (context.linkedin_attributes && context.linkedin_attributes.length > 0) {
+                const linkedinData = context.linkedin_attributes.reduce((acc, attr) => {
+                    acc[attr.attribute_name] = attr.attribute_value;
+                    return acc;
+                }, {});
+                
+                if (linkedinData.headline || linkedinData.summary || linkedinData.industry) {
+                    contextHTML += `
+                        <div class="context-section">
+                            <h4>💼 LinkedIn Profile</h4>
+                            ${linkedinData.headline ? `<div class="context-text"><strong>Headline:</strong> ${linkedinData.headline}</div>` : ''}
+                            ${linkedinData.industry ? `<div class="context-text"><strong>Industry:</strong> ${linkedinData.industry}</div>` : ''}
+                            ${linkedinData.summary ? `<div class="context-text"><strong>Summary:</strong> ${linkedinData.summary.substring(0, 150)}${linkedinData.summary.length > 150 ? '...' : ''}</div>` : ''}
+                        </div>
+                    `;
+                }
+            }
+            
+            contextDetails.innerHTML = contextHTML || '<div class="context-text">No detailed context available</div>';
+        }
+
+        // Toggle user context display
+        function toggleUserContext() {
+            if (contextDetails.style.display === 'none') {
+                contextDetails.style.display = 'block';
+                toggleContext.textContent = 'Hide User Context';
+            } else {
+                contextDetails.style.display = 'none';
+                toggleContext.textContent = 'Show User Context';
+            }
+        }
+
+        // Load available users
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+                
+                userSelector.innerHTML = '<option value="">Select a user...</option>';
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.user_id;
+                    option.textContent = `${user.name} - ${user.current_role}`;
+                    userSelector.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+
+        // Switch user
+        async function switchUser() {
+            const selectedUserId = userSelector.value;
+            if (!selectedUserId) {
+                showError('Please select a user first');
+                return;
+            }
+
+            try {
+                switchUserButton.disabled = true;
+                switchUserButton.textContent = 'Switching...';
+                
+                const response = await fetch(`/api/switch_user/${selectedUserId}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(`Switched to ${data.agent_name}`);
+                    // Refresh the status and reset chat
+                    await checkStatus();
+                    resetConversation();
+                    // Hide and reset context details
+                    contextDetails.style.display = 'none';
+                    toggleContext.textContent = 'Show User Context';
+                } else {
+                    showError(data.error || 'Failed to switch user');
+                }
+            } catch (error) {
+                console.error('Switch user error:', error);
+                showError('Failed to switch user');
+            } finally {
+                switchUserButton.disabled = false;
+                switchUserButton.textContent = 'Switch User';
+            }
+        }
+
+        // Send message function
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage('user', message);
+            messageInput.value = '';
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Add agent response and question
+                    addMessage('agent', data.response, data.question);
+                } else {
+                    showError(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                showError('Failed to send message. Please try again.');
+            } finally {
+                loading.classList.remove('show');
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Add message to chat
+        function addMessage(sender, text, question = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+            messageDiv.appendChild(bubbleDiv);
+
+            // Add question if provided (for agent messages)
+            if (question && sender === 'agent') {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'agent-question';
+                questionDiv.textContent = question;
+                messageDiv.appendChild(questionDiv);
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            chatMessages.appendChild(errorDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            chatMessages.appendChild(successDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+
+        // Reset conversation
+        async function resetConversation() {
+            try {
+                const response = await fetch('/api/reset');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    chatMessages.innerHTML = `
+                        <div class="message agent">
+                            <div class="message-bubble">
+                                Hi there! I'm your enhanced digital twin agent. Nice to meet you!
+                            </div>
+                            <div class="agent-question">
+                                What brings you here today? I'd love to learn more about you!
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showError('Failed to reset conversation');
+                }
+            } catch (error) {
+                console.error('Reset error:', error);
+                showError('Failed to reset conversation');
+            }
+        }
+
+        // Show profile modal
+        async function showProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                modalProfileDetails.innerHTML = `
+                    <h3>${data.name}</h3>
+                    <p><strong>Role:</strong> ${data.current_role}</p>
+                    <p><strong>Company:</strong> ${data.current_company}</p>
+                    <p><strong>Location:</strong> ${data.location}</p>
+                    <hr>
+                    <h4>Profile Overview</h4>
+                    <ul>
+                        <li>Education Records: ${data.education_count}</li>
+                        <li>Work Experience: ${data.experience_count}</li>
+                        <li>Skills: ${data.skills_count}</li>
+                        <li>Projects: ${data.projects_count}</li>
+                        <li>Professional Interests: ${data.interests_count}</li>
+                        <li>Networking Goals: ${data.networking_goals_count}</li>
+                    </ul>
+                `;
+                
+                profileModal.style.display = 'block';
+            } catch (error) {
+                console.error('Profile error:', error);
+                showError('Failed to load profile details');
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        resetButton.addEventListener('click', resetConversation);
+        profileButton.addEventListener('click', showProfile);
+        switchUserButton.addEventListener('click', switchUser);
+        toggleContext.addEventListener('click', toggleUserContext);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !messageInput.disabled) {
+                sendMessage();
+            }
+        });
+
+        // Modal event listeners
+        document.querySelector('.close').addEventListener('click', () => {
+            profileModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        checkStatus();
+        messageInput.focus();
+    </script>
+</body>
+</html>
